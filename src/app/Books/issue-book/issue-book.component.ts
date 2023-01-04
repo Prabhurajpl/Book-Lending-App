@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { BooksService } from 'src/app/Core/services/books.service';
 import { LibraryService } from 'src/app/Core/services/library.service';
 import { UsersService } from 'src/app/Core/services/users.service';
@@ -8,7 +9,7 @@ import { UsersService } from 'src/app/Core/services/users.service';
   templateUrl: './issue-book.component.html',
   styleUrls: ['./issue-book.component.scss']
 })
-export class IssueBookComponent implements OnInit {
+export class IssueBookComponent implements OnInit,OnDestroy {
 
   libdatsource!: any;
   issuedBooklist!: any;
@@ -16,6 +17,7 @@ export class IssueBookComponent implements OnInit {
   userEmail!: any;
   bookDataSource!: string[];
   bookArray: any[] = [];
+  subsrejctedbook$! :Subscription;
   constructor(
     private libservice: LibraryService,
     private bookservice: BooksService,
@@ -67,12 +69,18 @@ export class IssueBookComponent implements OnInit {
       this.bookservice.rejectBooksrequest(book.library,bookId)
       .then((resp)=>{
          alert(("Book list updated.."))
+         this.subsrejctedbook$ = this.bookservice.getIssuedBooks(this.userDataservice.userEmail).subscribe((resp) =>{
+         this.userDataservice.changeCountofBook(resp.length)
+    })
       })
       },
       error:(err)=>{
         console.log("error",err.messages)
       }})
   }
-
+  
+  ngOnDestroy(): void {
+    this.subsrejctedbook$.unsubscribe();
+  }
 
 }

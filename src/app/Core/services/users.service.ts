@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { addDoc, Firestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { collection } from '@firebase/firestore';
-import { BehaviorSubject, map, Observable, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, Subject, throwError } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 @Injectable({
@@ -19,6 +19,9 @@ export class UsersService {
   countofbooks = this.issuedBook.asObservable();
   userEmail$ = new BehaviorSubject<string>("")
   userId = this.userEmail$.asObservable();
+  public isLogined = new BehaviorSubject<boolean>(false);
+  loginedSucesss = this.isLogined.asObservable();
+  
   constructor(
     private http: HttpClient,
     private firestore: Firestore,
@@ -46,6 +49,7 @@ export class UsersService {
     return this._angularFireAuth.currentUser
       .then((user: any) => user.sendEmailVerification())
       .then(() => {
+        this.isLogined.next(false)
         this.router.navigateByUrl('verify-email');
       })
       .catch((error) => {
@@ -62,7 +66,7 @@ export class UsersService {
         window.alert(this.customErrorMessage("userData/add failed"));
       });
   }
-
+  
   Login(formvalues: any) {
     const { email: userEmail, password: userPassword } =  Object.assign(formvalues);
     return this._angularFireAuth.signInWithEmailAndPassword(userEmail, userPassword)
@@ -73,8 +77,8 @@ export class UsersService {
           this._angularFireAuth.authState.subscribe((user) => {
             if (user) {
               this.userEmail = user.email?.toString() ;
-              this.userEmail$.next(this.userEmail)
               this.isLoginedUser = true;
+              this.isLogined.next(true);
               this.router.navigateByUrl('Searchbooks');
             }
           });

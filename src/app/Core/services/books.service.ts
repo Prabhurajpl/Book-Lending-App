@@ -115,6 +115,19 @@ export class BooksService {
         book_issuedby :"",
       })
     }
+    
+    getLoginedUserDetails(email:string) :Observable<any>{
+      return this.db.collection('Users', ref => ref.where('email', '==', email)).snapshotChanges()
+      .pipe(
+       map((libcollection: any[]) =>
+        libcollection.map((item) => ({
+            id: item.payload.doc.id,
+            ...item.payload.doc.data(),
+          })) 
+        ),
+        catchError(this.handleError)
+      )
+    }
 
     handleError(error:any) {
       let errorMessage = '';

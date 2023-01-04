@@ -27,25 +27,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   
   ngOnInit(): void {
-    debugger
+    debugger;
     this.userEmail = this.userdataservice.userEmail;
-    this.routepathsubscr = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.currentUrl = event.url;
-        if (this.currentUrl === '/Searchbooks') {
-          this.islogin_or_register = true;
-        }
-      }
+    this.userdataservice.isLogined.subscribe((islogined) => {
+      this.islogin_or_register = islogined;
+    });
+
+    this.userdataservice.countofbooks.subscribe((issuedBook) => {
+      this.booklistCount = issuedBook;
+    });
+    this.userdataservice.userId.subscribe((Firstname) => {
+      this.userEmail = Firstname;
     });
    
-   this.userdataservice.countofbooks.subscribe((issuedBook) =>{
-      this.booklistCount = issuedBook
-      console.log("count",issuedBook)
-    })
-    this.userdataservice.userId.subscribe((userId) =>{
-      this.userEmail = userId
-      console.log("userId",userId)
-    })
   
   }
   ngOnDestroy(): void {
@@ -64,4 +58,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     })
     return this.booklistCount
   }
+
+
 }

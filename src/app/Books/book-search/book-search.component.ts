@@ -2,7 +2,7 @@ import { UsersService } from 'src/app/Core/services/users.service';
 import { BookDetails } from './../../shared/interfaces/book-details';
 import { BooksService } from './../../Core/services/books.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 import { LibraryService } from 'src/app/Core/services/library.service';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
@@ -28,6 +28,8 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   booklist!: any;
   bookArray: any[] = [];
   subs$! : Subscription;
+  bookHasExistInLibrary =false;
+
   constructor(
     private bookservice: BooksService,
     private libservice: LibraryService,
@@ -92,25 +94,42 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
 
   closepopup() {
+    this.selectedLib ="";
     this.islistlib = false;
   }
   saveBooktoLib() {
-    this.selectedBookdetails?.forEach((element) => {
-      element.library = this.selectedLib;
-    });
-    this.bookservice.addBook(this.selectedLib, this.selectedBookdetails[0])
-      .subscribe({
-        next:(resp: any) => {
-        window.alert('Books added to :' + this.selectedLib);
-        this.selectedLib = '';
-        this.islistlib = false;
-        },
-        error: (err) =>{
-          console.log(customErrormesages.addBooktoLibrary + err.messages);
-        }
+    if(this.selectedLib === ""){
+      alert("select a library")
+      return
+    }
+    this.libservice.getbooksexistinlibrary(this.selectedLib).subscribe((respData)=>{
+      let existbook:any [] =[];
+      respData.docs.forEach((doc :any) => {
+        existbook.push(doc.data());
       });
+      this.bookHasExistInLibrary = existbook.some((item :any) => { return item.isbn === this.selectedBookdetails[0].isbn})
+      if(!this.bookHasExistInLibrary){
+        this.selectedBookdetails?.forEach((element) => {element.library = this.selectedLib });
+        this.bookservice.addBook(this.selectedLib, this.selectedBookdetails[0])
+          .subscribe({
+            next:(resp: any) => {
+            window.alert('Books added to : ' + this.selectedLib);
+            this.selectedLib = '';
+            this.islistlib = false;
+            },
+            error: (err) =>{
+              console.log(customErrormesages.addBooktoLibrary + err.messages);
+            }
+          });
+        }
+        else{
+          alert("selected book already exists in this library")
+        }
+    })
+   
+
   }
-  
+
   ngOnDestroy(): void {
     this.subs$.unsubscribe();
   }
