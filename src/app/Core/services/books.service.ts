@@ -10,7 +10,7 @@ export class BooksService {
  
   filteredBooklist!:any;
   errorMessage :string ="";
-  constructor(private http: HttpClient,private db: AngularFirestore) { }
+  constructor(private http: HttpClient,private db: AngularFirestore) {   }
   
   getBooks(searchTerm:string): Observable<any> {
     return this.http.get(`http://openlibrary.org/search.json?q=${searchTerm}`)
@@ -70,7 +70,7 @@ export class BooksService {
     )
   }
 
-  getSelectedBook(bookIsbn:string,)  {
+  getSelectedBook(bookIsbn:string,) :any  {
     return this.db.collectionGroup('Books', ref => ref.where('isbn', '==', bookIsbn)).get()
    }
 
@@ -83,7 +83,7 @@ export class BooksService {
           })
     }
 
-    updateIssuedBookcollection(selectedLibrary:any,bookid:string){
+    updateIssuedBookcollection(selectedLibrary:any,bookid:string) :any{
       return  this.db.doc(`Books-Group/${selectedLibrary}/Books/${bookid}`).update({
         is_issuedbook: "issued",
         status:"Not Available",
@@ -106,7 +106,7 @@ export class BooksService {
       })
     }
     
-    updateBooktoLibrary(selectedLibrary:any,bookid:string){
+    updateBooktoLibrary(selectedLibrary:any,bookid:string) :any {
       return  this.db.doc(`Books-Group/${selectedLibrary}/Books/${bookid}`).update({
         is_issuedbook: "",
         is_requested: "false",
@@ -114,6 +114,19 @@ export class BooksService {
         book_requestedby :"",
         book_issuedby :"",
       })
+    }
+    
+    getLoginedUserDetails(email:string) :Observable<any>{
+      return this.db.collection('Users', ref => ref.where('email', '==', email)).snapshotChanges()
+      .pipe(
+       map((libcollection: any[]) =>
+        libcollection.map((item) => ({
+            id: item.payload.doc.id,
+            ...item.payload.doc.data(),
+          })) 
+        ),
+        catchError(this.handleError)
+      )
     }
 
     handleError(error:any) {

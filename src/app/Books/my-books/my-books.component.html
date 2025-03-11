@@ -16,10 +16,14 @@
              : book.is_issuedbook == "rejected" ? "Requested book was rejected"
              : book.is_issuedbook == "requestback" ? "Requested book to library" 
              : 'Pending' }} </div>
-      <div class="col border border-1 p-1" ><button  (click)="returnBooktoLibraray(book)"
+      <div class="col border border-1 p-1" ><button id="btnreturnBooktoLib" (click)="returnBooktoLibraray(book)"
         [disabled]="book.is_issuedbook == 'issued'  ? false :   
                      book.is_issuedbook == 'requestback' ? false : true" >Return</button>
       </div>
+      <!-- <div>
+        <button id="btnreturnBooktoLib" (click)="returnBooktoLibraray(book)">TempButton</button>
+      </div> -->
+
   </div>
 
 </div>

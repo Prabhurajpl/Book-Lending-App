@@ -25,6 +25,10 @@ export class LibraryBookListComponent implements OnInit {
 
   ngOnInit(): void {
     this.bookRequestedBy = this.userdataservice.userEmail;
+    this.getAllBooks();
+  }
+
+  getAllBooks(){
     this.bookservice.getALLBooks().subscribe((data) => {
       this.bookDataSource = data;
       this.filteredBooklist = this.bookDataSource;
@@ -57,7 +61,7 @@ export class LibraryBookListComponent implements OnInit {
          alert("Request has been sent to " + book.book_addedBy)
        })
        },
-      error:(err)=>{
+      error:(err:any)=>{
           console.log("error",err.messages)
        }}
      )

@@ -2,7 +2,7 @@ import { UsersService } from 'src/app/Core/services/users.service';
 import { BookDetails } from './../../shared/interfaces/book-details';
 import { BooksService } from './../../Core/services/books.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, Observable } from 'rxjs';
 import { LibraryService } from 'src/app/Core/services/library.service';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
@@ -28,6 +28,9 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   booklist!: any;
   bookArray: any[] = [];
   subs$! : Subscription;
+  librarySubscr !:Subscription;
+  bookHasExistInLibrary =false;
+  userId : string ="";
   constructor(
     private bookservice: BooksService,
     private libservice: LibraryService,
@@ -35,6 +38,11 @@ export class BookSearchComponent implements OnInit,OnDestroy {
     public afsdb: AngularFirestore,
   ) {}
   ngOnInit(): void {
+    this.getIssuedBooksCount();
+   }
+
+   getIssuedBooksCount(){
+    if(this.userservice.userEmail != undefined)
     this.subs$ = this.bookservice.getIssuedBooks(this.userservice.userEmail).subscribe((resp) =>{
               this.userservice.changeCountofBook(resp.length)
         })
@@ -71,9 +79,10 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
 
   getliblist(selectedbook: any) {
-    this.libservice.getLibcollections().subscribe({
-      next: (response) => {
-        this.allLibrary = response;
+   this.userId = this.userservice.userEmail;
+   this.librarySubscr =  this.libservice.getLibcollections().subscribe({
+     next :(response) => {
+        this.allLibrary = response?.filter((item:any) => {return item.added_by === this.userId});
         this.islistlib = true;
         this.selectedBookdetails = [];
         this.selectedBookdetails.push({
@@ -84,7 +93,7 @@ export class BookSearchComponent implements OnInit,OnDestroy {
           status: 'Available',
           book_addedBy: this.userservice.userEmail,
         });
-      },
+     },
       error: (err) => {
         console.log(customErrormesages.getLibraryCollection + err.messages);
       },
@@ -92,26 +101,47 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
 
   closepopup() {
+    this.selectedLib ="";
     this.islistlib = false;
+    if(this.librarySubscr)
+    this.librarySubscr.unsubscribe();
+
   }
   saveBooktoLib() {
-    this.selectedBookdetails?.forEach((element) => {
-      element.library = this.selectedLib;
-    });
-    this.bookservice.addBook(this.selectedLib, this.selectedBookdetails[0])
-      .subscribe({
-        next:(resp: any) => {
-        window.alert('Books added to :' + this.selectedLib);
-        this.selectedLib = '';
-        this.islistlib = false;
-        },
-        error: (err) =>{
-          console.log(customErrormesages.addBooktoLibrary + err.messages);
-        }
+    if(this.selectedLib === ""){
+      alert("select a library")
+      return
+    }
+    this.libservice.getbooksexistinlibrary(this.selectedLib).subscribe((respData)=>{
+      let existbook:any [] =[];
+      respData.docs.forEach((doc :any) => {
+        existbook.push(doc.data());
       });
+      this.bookHasExistInLibrary = existbook.some((item :any) => { return item.isbn === this.selectedBookdetails[0].isbn})
+      if(!this.bookHasExistInLibrary){
+        this.selectedBookdetails?.forEach((element) => {element.library = this.selectedLib });
+        this.bookservice.addBook(this.selectedLib, this.selectedBookdetails[0])
+          .subscribe({
+            next:(resp: any) => {
+            window.alert('Books added to : ' + this.selectedLib);
+            this.selectedLib = '';
+            this.islistlib = false;
+            },
+            error: (err) =>{
+              console.log(customErrormesages.addBooktoLibrary + err.messages);
+            }
+          });
+        }
+        else{
+          alert("selected book already exists in this library")
+        }
+    })
+   
+
   }
-  
+
   ngOnDestroy(): void {
+    if(this.subs$)
     this.subs$.unsubscribe();
   }
 }

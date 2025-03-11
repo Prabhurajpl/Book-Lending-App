@@ -31,6 +31,9 @@ export class UserRegistrationComponent implements OnInit {
   })
 
   ngOnInit(): void {
+    this.getAllcountries();
+  }
+  getAllcountries(){
     this.allCountries = Country.getAllCountries()
   }
 
@@ -38,8 +41,9 @@ export class UserRegistrationComponent implements OnInit {
     this.countryCode = value;
     this.statesBasedcountry = State.getStatesOfCountry(value);
   }
-  onStateselection(state: string) {
-    this.cityBasedStates = City.getCitiesOfState(this.countryCode, state);
+  onStateselection(state: string,countrycode?:string) {
+    countrycode = this.countryCode;
+    this.cityBasedStates = City.getCitiesOfState(countrycode, state);
   }
 
   userRegistrationSubmit() {

@@ -3,7 +3,7 @@
         <input type="text" class="form-control" placeholder="Add library" [(ngModel)]="name" (keyup.enter)="onEnter()" >
     </div>
     <ul >
-     <li [ngClass]="selectedLib == library.libname ? 'active' : ''" *ngFor="let library of librarylist"><a (click)="librayClick($event)">{{library.libname}}</a></li>
+     <li  [ngClass]="selectedLib == library.libname ? 'active' : ''" *ngFor="let library of librarylist"><a (click)="librayClick($event)">{{library.libname}}</a></li>
     </ul>
   
 </div>

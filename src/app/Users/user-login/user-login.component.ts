@@ -1,8 +1,8 @@
+import { Subscription, first, throwError } from 'rxjs';
 import { BooksService } from './../../Core/services/books.service';
 import { UsersService } from './../../Core/services/users.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { finalize, subscribeOn, take, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -10,10 +10,10 @@ import { Router } from '@angular/router';
   templateUrl: './user-login.component.html',
   styleUrls: ['./user-login.component.scss'],
 })
-export class UserLoginComponent implements OnInit,OnDestroy {
+export class UserLoginComponent implements OnInit {
   loading = false;
   setCount! :number ;
-  sub$ !:Subscription
+  subs$! :Subscription;
   constructor(private userdataservice: UsersService, private _router: Router ,private bookservice : BooksService) {}
  
  
@@ -42,19 +42,20 @@ export class UserLoginComponent implements OnInit,OnDestroy {
     if (this.UserLoginForm.invalid) {
       return;
     }
-    
-    this.userdataservice.Login(this.UserLoginForm.value)
-    // .then(()=>{
-    //   this.userdataservice.userEmail.next()
-    // })
-    // this.sub$=this.bookservice.getIssuedBooks(userEmail).subscribe((resp) =>{
-    //         console.log("resp",resp)
-    //         this.userdataservice.changeCountofBook(resp.length)
-    //      })
-    
+    const { email: userEmail, password: userPassword } = Object.assign(this.UserLoginForm.value);
+    this.userdataservice.Login(this.UserLoginForm.value).then(()=>{
+      this.bookservice.getLoginedUserDetails(userEmail).pipe(first())   
+      .subscribe({
+      next : (resp) =>{
+          this.userdataservice.userEmail$.next(resp[0].firstname)
+       }
+      })
+    }).catch((err :any) =>{
+      throw new Error(err.messages)
+    })
   }
-  ngOnDestroy(): void {
-    // this.sub$.unsubscribe();
-  }
+
+  
+ 
 
 }

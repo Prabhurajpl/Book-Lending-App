@@ -18,6 +18,9 @@ import { VerifyEmailComponent } from './verify-email/verify-email.component';
     CommonModule,
     UserRoutingModule,
     ReactiveFormsModule,
+  ],
+  exports:[
+    VerifyEmailComponent
   ]
 })
 export class UserModule { }

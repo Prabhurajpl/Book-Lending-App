@@ -20,16 +20,17 @@ export class MyBooksComponent implements OnInit {
 
   ngOnInit(): void {
     const userId = this.userDataservice.userEmail;
+    if(userId != undefined)
     this.bookservice.getMyBooks(userId).subscribe((resp)=>{
          this.myBooklist = resp;
     })
-  }
+  }  
   returnBooktoLibraray(book:any){
     let bookId ;
-    this.bookservice.getSelectedBook(book.isbn).subscribe((resp)=>{
+    this.bookservice.getSelectedBook(book.isbn).subscribe((resp:any)=>{
       bookId =resp.docs[0].id;
       this.bookservice.updateBooktoLibrary(book.library,bookId)
-      .then((resp)=>{
+      .then((resp:any)=>{   
          alert ("Book has been sent to library")
       })
       })

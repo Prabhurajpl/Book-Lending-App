@@ -22,7 +22,7 @@ export class LibraryService {
     this.liblist = this.itemsCollection.snapshotChanges();
   }
 
-  addLibrary(item: any) {
+  addLibrary(item: any):any{
    return  this.itemsCollection.add(item);
   } 
 
@@ -41,8 +41,7 @@ export class LibraryService {
    }
   
   getLibcollections():Observable<any>{
-    return this.liblist.pipe(
-      map((libcollection: any[]) =>
+    return this.liblist.pipe(map((libcollection: any[]) =>
       libcollection.map((item) => ({
           id: item.payload.doc.id,
           ...item.payload.doc.data(),
@@ -50,6 +49,10 @@ export class LibraryService {
       ),
       catchError(this.handleError)
     )
+  }
+  getbooksexistinlibrary(selectedLibrary:string) : Observable<any>{
+    return this.db.collectionGroup('Books', ref => ref.where('library', '==', selectedLibrary)).get()
+    
   }
 
   private handleError(error: HttpErrorResponse) {

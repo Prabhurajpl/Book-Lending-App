@@ -1,11 +1,9 @@
 import { Router } from '@angular/router';
-import { HttpClient} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { addDoc, Firestore } from '@angular/fire/firestore';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { collection } from '@firebase/firestore';
-import { BehaviorSubject, map, Observable, Subject, throwError } from 'rxjs';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -19,22 +17,24 @@ export class UsersService {
   countofbooks = this.issuedBook.asObservable();
   userEmail$ = new BehaviorSubject<string>("")
   userId = this.userEmail$.asObservable();
+  public isLogined = new BehaviorSubject<boolean>(false);
+  loginedSucesss = this.isLogined.asObservable();
+  
   constructor(
-    private http: HttpClient,
     private firestore: Firestore,
     public _angularFireAuth: AngularFireAuth,
     private router: Router,
-    private db: AngularFirestore
   ) {}
 
   changeCountofBook(newCount:number) {
     this.issuedBook.next(newCount);
   }
 
-  SignUp(formvalues: any) {
+  SignUp(formvalues: any) :object {
     const { email: userEmail, password: userPassword } = Object.assign(formvalues);
     return this._angularFireAuth.createUserWithEmailAndPassword(userEmail, userPassword)
-      .then(() => {
+      .then((resp) => {
+        if(resp.additionalUserInfo?.isNewUser)
         this.addUserdata(formvalues);
       })
       .catch((error) => {
@@ -53,17 +53,18 @@ export class UsersService {
       });
   }
 
-  addUserdata(value: any) {
+  addUserdata(value: any) : object {
     const dbInstance = collection(this.firestore, 'Users');
-    addDoc(dbInstance, value).then(() => {
+    return addDoc(dbInstance, value).then((resp) => {
+        console.log("adduserResponse",resp)
         this.SendVerificationMail();
       })
       .catch((err) => {
         window.alert(this.customErrorMessage("userData/add failed"));
       });
   }
-
-  Login(formvalues: any) {
+  
+  Login(formvalues: any) : any {
     const { email: userEmail, password: userPassword } =  Object.assign(formvalues);
     return this._angularFireAuth.signInWithEmailAndPassword(userEmail, userPassword)
       .then((resp) => {
@@ -73,8 +74,8 @@ export class UsersService {
           this._angularFireAuth.authState.subscribe((user) => {
             if (user) {
               this.userEmail = user.email?.toString() ;
-              this.userEmail$.next(this.userEmail)
               this.isLoginedUser = true;
+              this.isLogined.next(true);
               this.router.navigateByUrl('Searchbooks');
             }
           });
