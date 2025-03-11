@@ -101,7 +101,7 @@ export class BookSearchComponent implements OnInit,OnDestroy {
     this.bookservice.addBook(this.selectedLib, this.selectedBookdetails[0])
       .subscribe({
         next:(resp: any) => {
-        window.alert('Books added to :' + this.selectedLib);
+        window.alert('Books added to : ' + this.selectedLib);
         this.selectedLib = '';
         this.islistlib = false;
         },

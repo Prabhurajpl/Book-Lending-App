@@ -11,7 +11,7 @@
             id="{{book.isbn}}" style="margin-right: 4px;"(click)="reqApprove(book)" >
             {{book.is_issuedbook == "requestback" ? 'Requested' :
               book.is_issuedbook == "issued" ? 'Request Back'  : 'Approve'}} </button>
-             <button  class="btn btn-outline-danger" (click)="rejectbookreq(book)" >Reject </button>
+             <button  class="btn btn-outline-danger" (click)="rejectbookreq(book)" >Reject</button>
             </div>
           </div>
         </div>
