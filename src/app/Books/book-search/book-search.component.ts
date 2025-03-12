@@ -5,6 +5,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { LibraryService } from 'src/app/Core/services/library.service';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { collectionGroup } from '@angular/fire/firestore';
 
 @Component({
   selector: 'book-search',
@@ -112,6 +113,7 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
   
   ngOnDestroy(): void {
+    console.log(this.subs$)
     this.subs$.unsubscribe();
   }
 }
