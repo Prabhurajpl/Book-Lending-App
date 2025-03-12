@@ -93,6 +93,7 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
 
   closepopup() {
+    console.log(this.islistlib)
     this.islistlib = false;
   }
   saveBooktoLib() {
@@ -113,7 +114,6 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
   
   ngOnDestroy(): void {
-    console.log(this.subs$)
     this.subs$.unsubscribe();
   }
 }
