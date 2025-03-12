@@ -124,7 +124,7 @@ const enum pagedetails {
 }
 
 const enum customErrormesages {
-  bookSearchuURL = 'error occured at book search',
+  bookSearchuURL = 'error occure at book search',
   getLibraryCollection = 'erorr occured try to fetch libcollection',
   addBooktoLibrary ="error occured in add book to library",
 }
